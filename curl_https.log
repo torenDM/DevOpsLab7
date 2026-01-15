@@ -1,0 +1,11 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>DevOps Lab 7</title>
+  </head>
+  <body>
+    <h1>DevOps Lab 7: Docker nginx</h1>
+    <p>Container is running ✅</p>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-# DevOps Lab 7 — Docker basics (Nginx container)
+# DevOps Lab 7 — Docker basics (Nginx + HTTPS)
 
 **Демидов Матвей Александрович, ФИТ-1-2024 НМ**  
 **Дисциплина:** Методы и инструменты DevOps  
@@ -7,23 +7,18 @@
 ---
 
 ## 1) Задание (основная часть)
-Собрать образ и запустить контейнер:
-- внутри которого работает web-сервер **Nginx**
-- отдающий статическую **HTML** страницу с приветствием
-- для доступа снаружи пробросить порт **54321** в контейнер (mapping `54321:80`)
-- команду запуска контейнера оформить **shell-скриптом**
+- Создать Docker-образ с **Nginx**
+- Отдавать статическую HTML-страницу
+- Для доступа снаружи пробросить порт **54321** в контейнер
+- Команду запуска контейнера оформить shell-скриптом
 
 ---
 
-## 2) Что сделано
-- Установлен Docker на VM2
-- Создан Docker-образ `nginx-server` на базе `nginx:stable-alpine`
-- Добавлены файлы:
-  - `index.html` — страница приветствия
-  - `nginx.conf` — конфиг nginx внутри контейнера
-- Запущен контейнер `nginx-cont` с пробросом порта `54321:80`
-- Добавлен скрипт `deploy.sh` для сборки и запуска в 1 команду
-- Выполнены проверки через `docker ps` и `curl`
+## 2) Дополнительное задание (HTTPS)
+- Сгенерировать SSL-сертификат
+- Запустить nginx в контейнере по **HTTPS**
+- Сертификат пробросить в контейнер через **Volume Mapping**
+- Сделать скрипт обновления сертификата (пересоздания) и команду `nginx reload`
 
 ---
 
@@ -31,26 +26,21 @@
 - **VM2 (Docker host):** `10.0.2.16`  
   SSH из Windows: `ssh student@127.0.0.1 -p 2223`
 
-Проверка доступа:
-- на VM2: `curl http://127.0.0.1:54321`
-- (опционально) на Windows: `http://127.0.0.1:54321` (если добавлен проброс порта VirtualBox)
-
 ---
 
 ## 4) Структура проекта
 ```
 .
 ├─ deploy.sh
-├─ nginx
-│  ├─ dockerfile
-│  ├─ index.html
-│  └─ nginx-conf
-│     └─ nginx.conf
-├─ build.log
-├─ ps.log
-├─ curl.log
-├─ container_logs.log
-└─ deploy_run.log
+├─ renew_cert.sh
+├─ certs
+│  ├─ server.crt
+│  └─ server.key
+└─ nginx
+   ├─ dockerfile
+   ├─ index.html
+   └─ nginx-conf
+      └─ nginx.conf
 ```
 
 ---
@@ -63,75 +53,58 @@ cd ~/DevOpsLab7
 docker build -t nginx-server ./nginx -f ./nginx/dockerfile
 ```
 
-**Ожидаемо:** в конце сборки — `Successfully tagged nginx-server:latest`.
-
-### 5.2 Запуск контейнера с пробросом порта 54321
+### 5.2 Запуск контейнера (HTTPS) с volume mapping сертификатов
 ```bash
 docker rm -f nginx-cont 2>/dev/null || true
-docker run -d --name nginx-cont -p 54321:80 --restart unless-stopped nginx-server
+
+docker run -d --name nginx-cont   -p 54321:443   -v ~/DevOpsLab7/certs:/etc/nginx/certs:ro   --restart unless-stopped   nginx-server
 ```
 
-### 5.3 Проверка контейнера
+### 5.3 Проверка
 ```bash
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+curl -k https://127.0.0.1:54321 | head -n 20
 ```
-
-**Ожидаемо:** порт вида `0.0.0.0:54321->80/tcp` и статус `Up`.
-
-### 5.4 Проверка страницы
-```bash
-curl -s http://127.0.0.1:54321 | head -n 20
-```
-
-**Ожидаемо:** в HTML есть текст `DevOps Lab 7`.
 
 ---
 
-## 6) Скрипт деплоя
-Запуск в 1 команду:
+## 6) Скрипты
+
+### 6.1 deploy.sh
+Собирает образ и запускает контейнер с HTTPS:
 ```bash
 cd ~/DevOpsLab7
 ./deploy.sh
 ```
 
-**Ожидаемо:** скрипт выполнит build + run и выведет таблицу `docker ps`, а также подсказку URL.
+### 6.2 renew_cert.sh
+Пересоздаёт сертификат на хосте и выполняет `nginx -s reload` в контейнере:
+```bash
+cd ~/DevOpsLab7
+./renew_cert.sh
+```
 
 ---
 
-## 7) Скриншоты (что должно быть видно)
+## 7) Скриншоты
 
 ### 7.1 Build образа
-Файл: `screenshots/01_docker_build.png`  
-**На скрине видно:** команда `docker build ...` и успешное завершение (`Successfully tagged ...`).
-
 ![](screenshots/01_docker_build.png)
 
-### 7.2 Запущенный контейнер и проброс порта
-Файл: `screenshots/02_docker_ps_ports.png`  
-**На скрине видно:** `nginx-cont`, статус `Up`, проброс `54321->80/tcp`.
-
+### 7.2 Запущенный контейнер (порт 54321)
 ![](screenshots/02_docker_ps_ports.png)
 
-### 7.3 Проверка через curl
-Файл: `screenshots/03_curl_ok.png`  
-**На скрине видно:** HTML (заголовок/текст) со строкой `DevOps Lab 7`.
-
+### 7.3 Проверка страницы через curl
 ![](screenshots/03_curl_ok.png)
 
 ### 7.4 Проверка в браузере (опционально)
-Файл: `screenshots/04_browser_ok.png`  
-**На скрине видно:** адрес `127.0.0.1:54321` и страница из контейнера.
-
 ![](screenshots/04_browser_ok.png)
 
----
+### 7.5 HTTPS: docker ps (54321 → 443)
+![](screenshots/05_docker_ps_https.png)
 
-## 8) Дополнительное задание (SSL/HTTPS)
-В методичке есть доп.пункты:
-- сгенерировать SSL сертификат
-- поднять nginx в контейнере по HTTPS
-- пробросить сертификат через Volume Mapping
-- сделать скрипт обновления сертификата и `nginx reload`
+### 7.6 HTTPS: curl -k (страница отдаётся по https)
+![](screenshots/06_curl_https_ok.png)
 
-**Статус:** выполняется **только если преподаватель требует доп.задание**.  
-Если нужно — сделаем это отдельно (это будет версия “Lab7 + HTTPS”).
+### 7.7 Обновление сертификата + nginx reload
+![](screenshots/07_renew_reload.png)
