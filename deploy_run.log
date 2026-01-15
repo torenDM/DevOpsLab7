@@ -1,0 +1,20 @@
+Sending build context to Docker daemon  4.608kB
+Step 1/4 : FROM nginx:stable-alpine
+ ---> 826d3f25207a
+Step 2/4 : COPY index.html /usr/share/nginx/html/index.html
+ ---> Using cache
+ ---> f93238c7ac8d
+Step 3/4 : COPY nginx-conf/nginx.conf /etc/nginx/nginx.conf
+ ---> Using cache
+ ---> a845c13a341d
+Step 4/4 : EXPOSE 80
+ ---> Using cache
+ ---> eaadd69eb406
+Successfully built eaadd69eb406
+Successfully tagged nginx-server:latest
+nginx-cont
+ad9246d4c4fd99e70825558791f1b4bffd2d3ab0d7564dac73e27b2b9d027ac7
+NAMES        STATUS                  PORTS
+nginx-cont   Up Less than a second   0.0.0.0:54321->80/tcp, [::]:54321->80/tcp
+
+Open: http://127.0.0.1:54321

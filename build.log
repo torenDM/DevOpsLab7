@@ -1,0 +1,53 @@
+Sending build context to Docker daemon  4.608kB
+Step 1/4 : FROM nginx:stable-alpine
+stable-alpine: Pulling from library/nginx
+1074353eec0d: Pulling fs layer
+49c3d04ac9a0: Pulling fs layer
+e21cf1f5c34e: Pulling fs layer
+a30d3a4ae715: Pulling fs layer
+a3f8193e0094: Pulling fs layer
+58f93aab77a7: Pulling fs layer
+686540890f1c: Pulling fs layer
+ff9676a89558: Pulling fs layer
+a30d3a4ae715: Waiting
+a3f8193e0094: Waiting
+58f93aab77a7: Waiting
+686540890f1c: Waiting
+ff9676a89558: Waiting
+e21cf1f5c34e: Verifying Checksum
+e21cf1f5c34e: Download complete
+49c3d04ac9a0: Verifying Checksum
+49c3d04ac9a0: Download complete
+1074353eec0d: Verifying Checksum
+1074353eec0d: Download complete
+1074353eec0d: Pull complete
+a30d3a4ae715: Verifying Checksum
+a30d3a4ae715: Download complete
+49c3d04ac9a0: Pull complete
+e21cf1f5c34e: Pull complete
+a30d3a4ae715: Pull complete
+a3f8193e0094: Verifying Checksum
+a3f8193e0094: Download complete
+58f93aab77a7: Verifying Checksum
+58f93aab77a7: Download complete
+a3f8193e0094: Pull complete
+58f93aab77a7: Pull complete
+686540890f1c: Verifying Checksum
+686540890f1c: Download complete
+686540890f1c: Pull complete
+ff9676a89558: Verifying Checksum
+ff9676a89558: Download complete
+ff9676a89558: Pull complete
+Digest: sha256:67cbbcc757a6ce913b33e515b020cfd3923897ad883c452903b1e3487a95a570
+Status: Downloaded newer image for nginx:stable-alpine
+ ---> 826d3f25207a
+Step 2/4 : COPY index.html /usr/share/nginx/html/index.html
+ ---> f93238c7ac8d
+Step 3/4 : COPY nginx-conf/nginx.conf /etc/nginx/nginx.conf
+ ---> a845c13a341d
+Step 4/4 : EXPOSE 80
+ ---> Running in cb21a76b240e
+ ---> Removed intermediate container cb21a76b240e
+ ---> eaadd69eb406
+Successfully built eaadd69eb406
+Successfully tagged nginx-server:latest
